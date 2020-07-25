@@ -113,11 +113,11 @@ def generateData():
     
     #NOISE-----------------------------------
     
-    easyData.append([wNoise(.1) for t in datasetT])
-    easyData.append([wNoise(.2) for t in datasetT])
+    hardData.append([wNoise(.1) for t in datasetT])
+    hardData.append([wNoise(.2) for t in datasetT])
     mediumData.append([wNoise(.2) for t in datasetT])
     mediumData.append([wNoise(.4) for t in datasetT])
-    hardData.append([wNoise(.5) for t in datasetT])
+    easyData.append([wNoise(.5) for t in datasetT])
     
     noiseModel = [0 for t in datasetT]
     

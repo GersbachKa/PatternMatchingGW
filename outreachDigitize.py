@@ -103,9 +103,9 @@ fig.line(source=dataSrc, x='x',y='y',color='blue',legend_label='Data')
 fig.line(source=modelSrc,x='x',y='y',color='red',legend_label='Model')
 
 difficultySelect = Select(title='Select your difficulty:',value='Easy',options=['Easy','Medium','Hard'])
-easySelect = Select(title='Choose a dataset:',value='1',options=[str(x) for x in range(1,len(easyDataArr)+1)])
-mediumSelect = Select(title='Choose a dataset:',value='1',options=[str(x) for x in range(1,len(mediumDataArr)+1)])
-hardSelect = Select(title='Choose a dataset:',value='1',options=[str(x) for x in range(1,len(hardDataArr)+1)])
+easySelect = Select(title='Choose an Easy dataset:',value='1',options=[str(x) for x in range(1,len(easyDataArr)+1)])
+mediumSelect = Select(title='Choose a Medium dataset:',value='1',options=[str(x) for x in range(1,len(mediumDataArr)+1)])
+hardSelect = Select(title='Choose a Hard dataset:',value='1',options=[str(x) for x in range(1,len(hardDataArr)+1)])
 
 
 modelTypeSelect = Select(title='Model Type:',value='Noise',options=['Noise','Monochromatic','Coalescence','Burst'])
@@ -128,51 +128,91 @@ def on_dataSelect(attrname, old, new):
     diff = difficultySelect.value
     if diff == 'Easy':
         l.children[2].children[0].children[1] = easySelect #Show correct slider
-        modelNum = int(easySelect.value)-1
-        dataSrc.data=dict(x=timeArr,y=easyDataArr[modelNum])
+        dataNum = int(easySelect.value)-1
+        dataSrc.data=dict(x=timeArr,y=easyDataArr[dataNum])
         
     elif diff == 'Medium':
         l.children[2].children[0].children[1] = mediumSelect #Show correct slider
-        modelNum = int(mediumSelect.value)-1
-        dataSrc.data=dict(x=timeArr,y=mediumDataArr[modelNum])
+        dataNum = int(mediumSelect.value)-1
+        dataSrc.data=dict(x=timeArr,y=mediumDataArr[dataNum])
         
     else:
         l.children[2].children[0].children[1] = hardSelect #Show correct slider
-        modelNum = int(hardSelect.value)-1
-        dataSrc.data=dict(x=timeArr,y=hardDataArr[modelNum])
+        dataNum = int(hardSelect.value)-1
+        dataSrc.data=dict(x=timeArr,y=hardDataArr[dataNum])
     
     return
-    
-    value = dataSelect.value
-    if value == 'Dataset 1':
-        dataSrc.data=dict(x=dataArr[:,0],y=dataArr[:,1])
-    elif value == 'Dataset 2':
-        dataSrc.data=dict(x=dataArr[:,2],y=dataArr[:,3])
-    else:
-        print("Something went wrong... (data select)")
+
 
 def on_modelChange(attrname, old, new):
-    modelVal = modelSelect.value
-    toRoll = int(xSlider.value*100)
-    toAdd = ySlider.value
-    if modelVal =='Sigma of 1':
-        modelSrc.data=dict(x=modelArr[:,0],y=np.roll(modelArr[:,1],toRoll)+toAdd)
-    elif modelVal =='Sigma of 0.5':
-        modelSrc.data=dict(x=modelArr[:,2],y=np.roll(modelArr[:,3],toRoll)+toAdd)
+    modelType = modelTypeSelect.value
+    toRoll = int(xSlider.value*100) #If applicable
+    if modelType == 'Noise':
+        l.children[2].children[1].children[1] = noiseSelect
+        modelNum = int(noiseSelect.value)-1
+        #no roll
+        modelSrc.data = dict(x=timeArr,y=noiseModel[modelNum])
+                             
+    elif modelType == 'Monochromatic':
+        l.children[2].children[1].children[1] = monoSelect
+        modelNum = int(monoSelect.value)-1
+        #Yes roll
+        modelSrc.data = dict(x=timeArr,y=np.roll(monoModel[modelNum],toRoll))
+    
+    elif modelType == 'Coalescence':
+        l.children[2].children[1].children[1] = coalSelect
+        modelNum = int(coalSelect.value)-1
+        #No roll
+        modelSrc.data = dict(x=timeArr,y=coalModel[modelNum])
+        
     else:
-        print("Something went wrong... (model select)")
-
+        l.children[2].children[1].children[1] = burstSelect
+        modelNum = int(burstSelect.value)-1
+        #Yes roll
+        modelSrc.data = dict(x=timeArr,y=np.roll(burstModel[modelNum],toRoll))
+    
 
 def on_goButton():
     curData = dataSrc.data['y']
     curModel = modelSrc.data['y']
     res = curData-curModel
     score = int(10000*(1/np.dot(res,res)))
-    l.children[2].children[2].children[1] = Paragraph(text='Your score for {} is: {}'.format(dataSelect.value,score))
+    
+    diff = difficultySelect.value
+    datasetNum = 0
+    if diff == 'Easy':
+        datasetNum = easySelect.value
+    elif diff == 'Medium':
+        datasetNum = mediumSelect.value
+        score*=1.5
+        score=int(score)
+    else:
+        score*=2
+        score=int(score)
+        datasetNum = hardSelect.value
+    
+    l.children[2].children[2].children[2] = Paragraph(
+        text='Your score for {} dataset {} is: {}'.format(diff,datasetNum,score)
+    )
 
     
 
 difficultySelect.on_change('value',on_dataSelect)
+easySelect.on_change('value',on_dataSelect)
+mediumSelect.on_change('value',on_dataSelect)
+hardSelect.on_change('value',on_dataSelect)
+
+modelTypeSelect.on_change('value',on_modelChange)
+noiseSelect.on_change('value',on_modelChange)
+monoSelect.on_change('value',on_modelChange)
+coalSelect.on_change('value',on_modelChange)
+burstSelect.on_change('value',on_modelChange)
+xSlider.on_change('value',on_modelChange)
+
+
+goButton.on_click(on_goButton)
+
+
 
 #Layout of webpage------------------------------------------------------------
 
@@ -180,7 +220,7 @@ difficultySelect.on_change('value',on_dataSelect)
 layoutList = [
     [description],
     [fig],
-    [[difficultySelect,easySelect],[modelTypeSelect,noiseSelect],[xSlider,[goButton, results]]]
+    [[difficultySelect,easySelect],[modelTypeSelect,noiseSelect],[xSlider,goButton, results]]
 ]
 l = layout(layoutList,sizing_mode='scale_width')
 
