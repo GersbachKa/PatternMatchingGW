@@ -176,8 +176,9 @@ def on_modelChange(attrname, old, new):
 def on_goButton():
     curData = dataSrc.data['y']
     curModel = modelSrc.data['y']
-    res = curData-curModel
-    score = int(10000*(1/np.dot(res,res)))
+    res = np.square(curData-curModel)
+    score = np.sum(res)/len(res)
+    score = int(100/score)
     
     diff = difficultySelect.value
     datasetNum = 0
@@ -185,11 +186,7 @@ def on_goButton():
         datasetNum = easySelect.value
     elif diff == 'Medium':
         datasetNum = mediumSelect.value
-        score*=1.5
-        score=int(score)
-    else:
-        score*=2
-        score=int(score)
+    else:   
         datasetNum = hardSelect.value
     
     l.children[3].children[2].children[2] = Paragraph(
