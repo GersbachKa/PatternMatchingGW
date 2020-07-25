@@ -1,1 +1,1 @@
-bokeh serve outreachDigitize.py --port=8080 --allow-websocket-origin=*
+bokeh serve outreachDigitize.py  --allow-websocket-origin=*

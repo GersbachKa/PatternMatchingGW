@@ -133,7 +133,7 @@ def generateData():
     
 def writeData(timeList,eData,mData,hData,nMod,mMod,cMod,bMod):
     
-    with open("dataFile.csv",'w') as f:
+    with open(folderPath+"dataFile.csv",'w') as f:
         write=csv.writer(f)
         titleColumn = ['t']
         titleColumn.extend(['easyData']*len(eData))
@@ -142,7 +142,7 @@ def writeData(timeList,eData,mData,hData,nMod,mMod,cMod,bMod):
         write.writerow(titleColumn)
     
         for timestep in range(len(timeList)):
-            row = []
+            row = [timeList[timestep]]
             for dataset in range(len(eData)):
                 row.append(eData[dataset][timestep])
             for dataset in range(len(mData)):
@@ -153,7 +153,7 @@ def writeData(timeList,eData,mData,hData,nMod,mMod,cMod,bMod):
             write.writerow(row)
             
     
-    with open("modelFile.csv",'w') as f:
+    with open(folderPath+"modelFile.csv",'w') as f:
         write=csv.writer(f)
         titleColumn = ['t']
         titleColumn.extend(['Noise'])
@@ -163,7 +163,7 @@ def writeData(timeList,eData,mData,hData,nMod,mMod,cMod,bMod):
         write.writerow(titleColumn)
     
         for timestep in range(len(timeList)):
-            row = [nMod[timestep]]
+            row = [timeList[timestep],nMod[timestep]]
             for model in range(len(mMod)):
                 row.append(mMod[model][timestep])
             for model in range(len(cMod)):
