@@ -114,30 +114,31 @@ monoSelect = Select(title='Monochromatic model:',value='1',options=[str(x) for x
 coalSelect = Select(title='Coalescence model:',value='1',options=[str(x) for x in range(1,len(coalModel)+1)])
 burstSelect = Select(title='Burst model:',value='1',options=[str(x) for x in range(1,len(burstModel)+1)])
 
-xSlider = Slider(start=-5,end=5,value=0,step=0.01,title='Slide model on x axis (Not functional on Coalescence models)')
+xSlider = Slider(start=-5,end=5,value=0,step=0.01,title='Slide model on x axis (Only on burst models)')
 
 goButton = Button(label='Test results',button_type='success')
 results = Paragraph(text="Press the \'Test results\' button see how close you are!")
 
-description = Paragraph(text="The goal of this activity is to try and match a model to a dataset! You can do this by first selecting a dataset you want to test. Then select the type of model you want. Next, move the slider to fit the data as best you can. Finally, select the \'Test Results\' button and it will give you a score. Try to get the highest score on each dataset!")
+description1 = Paragraph(text="When a gravitational wave detector such as LIGO or the future LISA detects gravitational waves, they’re not detected as perfect curves like one might expect. Rather they are hidden in instrument noise from the detector itself as well as background noise the detector picks up due to its extreme sensitivity. To pull gravitational wave signals from this noise there are teams of scientists and data analysts whose sole purpose is to create different methods of writing programs that can pull a gravitational wave signal out from raw detector data. The more automated the data analysis of the detector data is the more time scientists can spend working on other problems, which is why data analysis innovation is so important.")
 
+description2 = Paragraph(text="In this activity there are simulations of raw detector data that contain noise and a gravitational wave signal from a certain type of astrophysical phenomena. Your job will be to best match the model gravitational wave signal with the curve from the noisy data. This simulates how data analysis retrieves the noiseless gravitational wave signal from the raw data. By moving the x and y axis sliders you can adjust where the model gravitational wave signal is on the graph, and by adjusting the parameter values you can try to find the real gravitational wave signal. Once you have obtained a model gravitational wave signal that best represents the gravitational wave signal in the noisy data click “test results” to see what you scored! Your score reflects how well your model gravitational wave signal fits the actual gravitational wave signal within the data.")
 
 #Create callback functions for widgets----------------------------------------
 
 def on_dataSelect(attrname, old, new):
     diff = difficultySelect.value
     if diff == 'Easy':
-        l.children[2].children[0].children[1] = easySelect #Show correct slider
+        l.children[3].children[0].children[1] = easySelect #Show correct slider
         dataNum = int(easySelect.value)-1
         dataSrc.data=dict(x=timeArr,y=easyDataArr[dataNum])
         
     elif diff == 'Medium':
-        l.children[2].children[0].children[1] = mediumSelect #Show correct slider
+        l.children[3].children[0].children[1] = mediumSelect #Show correct slider
         dataNum = int(mediumSelect.value)-1
         dataSrc.data=dict(x=timeArr,y=mediumDataArr[dataNum])
         
     else:
-        l.children[2].children[0].children[1] = hardSelect #Show correct slider
+        l.children[3].children[0].children[1] = hardSelect #Show correct slider
         dataNum = int(hardSelect.value)-1
         dataSrc.data=dict(x=timeArr,y=hardDataArr[dataNum])
     
@@ -148,25 +149,25 @@ def on_modelChange(attrname, old, new):
     modelType = modelTypeSelect.value
     toRoll = int(xSlider.value*100) #If applicable
     if modelType == 'Noise':
-        l.children[2].children[1].children[1] = noiseSelect
+        l.children[3].children[1].children[1] = noiseSelect
         modelNum = int(noiseSelect.value)-1
         #no roll
         modelSrc.data = dict(x=timeArr,y=noiseModel[modelNum])
                              
     elif modelType == 'Monochromatic':
-        l.children[2].children[1].children[1] = monoSelect
+        l.children[3].children[1].children[1] = monoSelect
         modelNum = int(monoSelect.value)-1
-        #Yes roll
-        modelSrc.data = dict(x=timeArr,y=np.roll(monoModel[modelNum],toRoll))
+        #Yes roll TODO [Broken Roll]
+        modelSrc.data = dict(x=timeArr,y=monoModel[modelNum])
     
     elif modelType == 'Coalescence':
-        l.children[2].children[1].children[1] = coalSelect
+        l.children[3].children[1].children[1] = coalSelect
         modelNum = int(coalSelect.value)-1
         #No roll
         modelSrc.data = dict(x=timeArr,y=coalModel[modelNum])
         
     else:
-        l.children[2].children[1].children[1] = burstSelect
+        l.children[3].children[1].children[1] = burstSelect
         modelNum = int(burstSelect.value)-1
         #Yes roll
         modelSrc.data = dict(x=timeArr,y=np.roll(burstModel[modelNum],toRoll))
@@ -191,8 +192,8 @@ def on_goButton():
         score=int(score)
         datasetNum = hardSelect.value
     
-    l.children[2].children[2].children[2] = Paragraph(
-        text='Your score for {} dataset {} is: {}'.format(diff,datasetNum,score)
+    l.children[3].children[2].children[2] = Paragraph(
+        text='Your score for {} dataset {} is: {} pts!'.format(diff,datasetNum,score)
     )
 
     
@@ -218,7 +219,8 @@ goButton.on_click(on_goButton)
 
 
 layoutList = [
-    [description],
+    [description1],
+    [description2],
     [fig],
     [[difficultySelect,easySelect],[modelTypeSelect,noiseSelect],[xSlider,goButton, results]]
 ]

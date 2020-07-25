@@ -14,6 +14,7 @@ def burst(t,mu,sigma):
     return (1/(sigma*np.sqrt(2*np.pi)))*np.exp((-1/2)*(((t-mu)/sigma)**2))
 
 def monochromatic(t,amplitude,period,phase):
+    phase = 0
     return amplitude*np.cos(((2*np.pi*t)/period + phase))
 
 def coalescing(t,A,B,t_c,phi_c,lamb):
@@ -167,9 +168,9 @@ def writeData(timeList,eData,mData,hData,nMod,mMod,cMod,bMod):
             for model in range(len(mMod)):
                 row.append(mMod[model][timestep])
             for model in range(len(cMod)):
-                row.append(cMod[dataset][timestep])
+                row.append(cMod[model][timestep])
             for model in range(len(bMod)):
-                row.append(bMod[dataset][timestep])
+                row.append(bMod[model][timestep])
                 
             write.writerow(row)
 
