@@ -1,4 +1,4 @@
-folderPath = "/home/kyle/Projects/4Spot/PatternMatchingGW/" #include an extra slash at the end
+folderPath = "gravitySleuth/" #include an extra slash at the end
 
 import numpy as np
 import csv
@@ -134,7 +134,7 @@ def generateData():
     
 def writeData(timeList,eData,mData,hData,nMod,mMod,cMod,bMod):
     
-    with open(folderPath+"dataFile.csv",'w') as f:
+    with open(folderPath+"Datafiles/dataFile.csv",'w') as f:
         write=csv.writer(f)
         titleColumn = ['t']
         titleColumn.extend(['easyData']*len(eData))
@@ -154,7 +154,7 @@ def writeData(timeList,eData,mData,hData,nMod,mMod,cMod,bMod):
             write.writerow(row)
             
     
-    with open(folderPath+"modelFile.csv",'w') as f:
+    with open(folderPath+"Datafiles/modelFile.csv",'w') as f:
         write=csv.writer(f)
         titleColumn = ['t']
         titleColumn.extend(['Noise'])

@@ -1,4 +1,4 @@
-folderPath = "/home/kyle/Projects/4Spot/PatternMatchingGW/" #include an extra slash at the end
+folderPath = "gravitySleuth/" #include an extra slash at the end
 
 #Imports
 import numpy as np
@@ -9,7 +9,7 @@ import os
 from bokeh.io import curdoc
 from bokeh.layouts import layout
 from bokeh.models import ColumnDataSource
-from bokeh.models import Select, Slider, Button, Paragraph
+from bokeh.models import Select, Slider, Button, Paragraph, Div
 from bokeh.plotting import figure
 
 
@@ -38,7 +38,7 @@ def readData():
     global coalModel
     global burstModel
 
-    with open(folderPath+"dataFile.csv",'r') as f:
+    with open(folderPath+"Datafiles/dataFile.csv",'r') as f:
         fullread = list(csv.reader(f))
         header = list(fullread[0])
         dataArr = np.array(fullread[1:],dtype='float64')
@@ -58,7 +58,7 @@ def readData():
         hardDataArr = np.array(hardDataArr)
         
     
-    with open(folderPath+"modelFile.csv",'r') as f:
+    with open(folderPath+"Datafiles/modelFile.csv",'r') as f:
         fullread = list(csv.reader(f))
         header = list(fullread[0])
         modelArr = np.array(fullread[1:],dtype='float64')
@@ -96,7 +96,8 @@ except:
 dataSrc = ColumnDataSource(data=dict(x=timeArr,y=easyDataArr[0]))
 modelSrc = ColumnDataSource(data=dict(x=timeArr,y=noiseModel[0]))
 
-fig = figure(title='Dataset to match', plot_height=300, plot_width=800)
+fig = figure(title='Dataset to match', plot_height=300, plot_width=800, 
+             x_axis_label = 'Time (seconds)', y_axis_label = 'Strain (delta m/m)')
 
 #Default value for figure
 fig.line(source=dataSrc, x='x',y='y',color='blue',legend_label='Data')
@@ -119,26 +120,27 @@ xSlider = Slider(start=-5,end=5,value=0,step=0.01,title='Slide model on x axis (
 goButton = Button(label='Test results',button_type='success')
 results = Paragraph(text="Press the \'Test results\' button see how close you are!")
 
-description1 = Paragraph(text="When a gravitational wave detector such as LIGO or the future LISA detects gravitational waves, they’re not detected as perfect curves like one might expect. Rather they are hidden in instrument noise from the detector itself as well as background noise the detector picks up due to its extreme sensitivity. To pull gravitational wave signals from this noise there are teams of scientists and data analysts whose sole purpose is to create different methods of writing programs that can pull a gravitational wave signal out from raw detector data. The more automated the data analysis of the detector data is the more time scientists can spend working on other problems, which is why data analysis innovation is so important.")
-
-description2 = Paragraph(text="In this activity there are simulations of raw detector data that contain noise and a gravitational wave signal from a certain type of astrophysical phenomena. Your job will be to best match the model gravitational wave signal with the curve from the noisy data. This simulates how data analysis retrieves the noiseless gravitational wave signal from the raw data. By moving the x and y axis sliders you can adjust where the model gravitational wave signal is on the graph, and by adjusting the parameter values you can try to find the real gravitational wave signal. Once you have obtained a model gravitational wave signal that best represents the gravitational wave signal in the noisy data click “test results” to see what you scored! Your score reflects how well your model gravitational wave signal fits the actual gravitational wave signal within the data.")
+with open(folderPath+"WebpageHTML/TitleAndDescription.html",'r') as f:
+    description = Div(text=f.read())
+with open(folderPath+"WebpageHTML/endBits.html",'r') as f:
+    endBits = Div(text=f.read())
 
 #Create callback functions for widgets----------------------------------------
 
 def on_dataSelect(attrname, old, new):
     diff = difficultySelect.value
     if diff == 'Easy':
-        l.children[3].children[0].children[1] = easySelect #Show correct slider
+        l.children[2].children[0].children[1] = easySelect #Show correct slider
         dataNum = int(easySelect.value)-1
         dataSrc.data=dict(x=timeArr,y=easyDataArr[dataNum])
         
     elif diff == 'Medium':
-        l.children[3].children[0].children[1] = mediumSelect #Show correct slider
+        l.children[2].children[0].children[1] = mediumSelect #Show correct slider
         dataNum = int(mediumSelect.value)-1
         dataSrc.data=dict(x=timeArr,y=mediumDataArr[dataNum])
         
     else:
-        l.children[3].children[0].children[1] = hardSelect #Show correct slider
+        l.children[2].children[0].children[1] = hardSelect #Show correct slider
         dataNum = int(hardSelect.value)-1
         dataSrc.data=dict(x=timeArr,y=hardDataArr[dataNum])
     
@@ -149,25 +151,25 @@ def on_modelChange(attrname, old, new):
     modelType = modelTypeSelect.value
     toRoll = int(xSlider.value*100) #If applicable
     if modelType == 'Noise':
-        l.children[3].children[1].children[1] = noiseSelect
+        l.children[2].children[1].children[1] = noiseSelect
         modelNum = int(noiseSelect.value)-1
         #no roll
         modelSrc.data = dict(x=timeArr,y=noiseModel[modelNum])
                              
     elif modelType == 'Monochromatic':
-        l.children[3].children[1].children[1] = monoSelect
+        l.children[2].children[1].children[1] = monoSelect
         modelNum = int(monoSelect.value)-1
         #Yes roll TODO [Broken Roll]
         modelSrc.data = dict(x=timeArr,y=monoModel[modelNum])
     
     elif modelType == 'Coalescence':
-        l.children[3].children[1].children[1] = coalSelect
+        l.children[2].children[1].children[1] = coalSelect
         modelNum = int(coalSelect.value)-1
         #No roll
         modelSrc.data = dict(x=timeArr,y=coalModel[modelNum])
         
     else:
-        l.children[3].children[1].children[1] = burstSelect
+        l.children[2].children[1].children[1] = burstSelect
         modelNum = int(burstSelect.value)-1
         #Yes roll
         modelSrc.data = dict(x=timeArr,y=np.roll(burstModel[modelNum],toRoll))
@@ -189,7 +191,7 @@ def on_goButton():
     else:   
         datasetNum = hardSelect.value
     
-    l.children[3].children[2].children[2] = Paragraph(
+    l.children[2].children[2].children[2] = Paragraph(
         text='Your score for {} dataset {} is: {} pts!'.format(diff,datasetNum,score)
     )
 
@@ -216,12 +218,12 @@ goButton.on_click(on_goButton)
 
 
 layoutList = [
-    [description1],
-    [description2],
+    [description],
     [fig],
-    [[difficultySelect,easySelect],[modelTypeSelect,noiseSelect],[xSlider,goButton, results]]
+    [[difficultySelect,easySelect],[modelTypeSelect,noiseSelect],[xSlider,goButton, results]],
+    [endBits]
 ]
 l = layout(layoutList,sizing_mode='scale_width')
 
 curdoc().add_root(l)
-curdoc().title = "Outreach Activity"
+curdoc().title = "Gravity Sleuth"
